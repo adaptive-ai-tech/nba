@@ -24,6 +24,15 @@ Panel {
       return root.bar.switchPanelFrom(root.hostWidget || root, direction)
     return false
   }
+  // Local-only usage log: ~/.local/state/nba-scores/usage.log, rotated at 512 KB (log + .1 stay under 1 MB). No network.
+  function logUsage(event, detail) {
+    Quickshell.execDetached(["sh", "-c",
+      "d=\"${XDG_STATE_HOME:-$HOME/.local/state}/nba-scores\"; mkdir -p \"$d\"; f=\"$d/usage.log\"; " +
+      "[ \"$(stat -c%s \"$f\" 2>/dev/null || echo 0)\" -gt 524288 ] && mv -f \"$f\" \"$f.1\"; " +
+      "printf '%s %s %s\\n' \"$(date -Iseconds)\" \"$1\" \"$2\" >> \"$f\"",
+      "nba-scores", String(event), String(detail || "")])
+  }
+
   // One click on a score opens that game's live page in its own app window.
   function openUrl(url, appWindow) {
     if (!/^(https|upi):\/\//.test(url)) return
@@ -103,7 +112,7 @@ Panel {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.openUrl(gameItem.modelData.url, true)
+                onClicked: { root.logUsage("open-game", gameItem.modelData.gameId); root.openUrl(gameItem.modelData.url, true) }
               }
               Row {
                 id: row
@@ -137,7 +146,7 @@ Panel {
                     anchors.fill: parent
                     anchors.margins: -6
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.expanded = (root.expanded === gameItem.modelData.gameId ? "" : gameItem.modelData.gameId)
+                    onClicked: { root.logUsage("boxscore", gameItem.modelData.gameId); root.expanded = (root.expanded === gameItem.modelData.gameId ? "" : gameItem.modelData.gameId) }
                   }
                 }
               }
@@ -177,7 +186,7 @@ Panel {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.showDonate = !root.showDonate
+            onClicked: { root.logUsage("support", root.showDonate ? "hide" : "show"); root.showDonate = !root.showDonate }
           }
         }
 
@@ -215,7 +224,7 @@ Panel {
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
-              onClicked: root.openUrl(root.donateUrl, false)
+              onClicked: { root.logUsage("support", "open-upi"); root.openUrl(root.donateUrl, false) }
             }
           }
         }

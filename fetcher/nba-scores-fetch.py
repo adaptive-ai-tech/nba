@@ -2,7 +2,7 @@
 """NBA Scores fetcher (Adaptive AI Technologies, MIT).
 Polls the public NBA data feed (cdn.nba.com, falling back to NBA's S3 origin) and writes ~/.cache/nba-scores/scores.json
 for the Omarchy bar widget. No keys, no login, no telemetry."""
-import json, os, time, subprocess, urllib.request
+import json, os, sys, time, subprocess, urllib.request
 from datetime import datetime, timezone, timedelta
 
 LOCAL_TZ = datetime.now().astimezone().tzinfo
@@ -30,13 +30,27 @@ def conf():
 
 # cdn.nba.com sits behind a CDN that returns 403 in some regions; the same official
 # files are served by NBA's own S3 origin, used as a fallback.
+def log(msg):
+    """One line to stdout; systemd stores it in journald (journalctl --user -u nba-scores)."""
+    print(msg, file=sys.stdout, flush=True)
+
 ORIGIN = "https://nba-prod-us-east-1-mediaops-stats.s3.amazonaws.com/NBA"
 
 def get(url, timeout=15):
+    name = url.rsplit("/", 1)[-1]
+    t0 = time.monotonic()
     try:
-        return _get(url, timeout)
-    except Exception:
-        return _get(url.replace("https://cdn.nba.com/static/json", ORIGIN), timeout)
+        d = _get(url, timeout)
+        src = "cdn"
+    except Exception as e1:
+        try:
+            d = _get(url.replace("https://cdn.nba.com/static/json", ORIGIN), timeout)
+            src = "s3"
+        except Exception as e2:
+            log(f"fetch-error {name} cdn={str(e1)[:80]} s3={str(e2)[:80]} ms={int((time.monotonic()-t0)*1000)}")
+            raise
+    log(f"fetch {name} src={src} ms={int((time.monotonic()-t0)*1000)}")
+    return d
 
 def _get(url, timeout):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 omarchy-nba-scores", "Referer": "https://www.nba.com/"})
@@ -103,7 +117,8 @@ def upcoming(c, cache):
         return cache
 
 def main():
-    state, sched, box = {}, {}, {}
+    state, sched, box, seen = {}, {}, {}, {}
+    log("start")
     while True:
         c = conf()
         live = False
@@ -117,6 +132,9 @@ def main():
                 t = local(g.get("gameTimeUTC", ""))
                 if st == 2:
                     live = True
+                if seen.get(gid) != st:
+                    log(f"state {a['teamTricode']}@{h['teamTricode']} {gid} {seen.get(gid)}->{st} {a['score']}-{h['score']}")
+                    seen[gid] = st
                 if st == 2 or (st == 3 and gid not in box):
                     lb = leaders(gid)
                     if lb:
@@ -142,6 +160,7 @@ def main():
                                   "live": live, "games": games, "upcoming": sched.get("upcoming", []),
                                   "donateUrl": str(c.get("donateUrl") or "")})
         except Exception as e:
+            log(f"error {type(e).__name__}: {str(e)[:200]}")
             try:
                 with open(os.path.join(CACHE, "scores.json")) as f:
                     old = json.load(f)

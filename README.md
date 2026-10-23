@@ -17,7 +17,7 @@ Free for everyone, no account or login needed.
 omarchy plugin add https://github.com/adaptive-ai-tech/nba.git --enable
 ~/.config/omarchy/plugins/io.github.adaptive-ai-tech.nba/install.sh   # starts the user service, no sudo
 ```
-Optional: `omarchy bar move io.github.adaptive-ai-tech.nba --section right`
+Recommended placement (next to the clock): `omarchy bar move io.github.adaptive-ai-tech.nba --after omarchy.clock`
 
 Requires `python3`, `systemd --user`, and `chromium` (or Omarchy's `omarchy-launch-webapp`) for game pages.
 
@@ -45,6 +45,13 @@ Requires `python3`, `systemd --user`, and `chromium` (or Omarchy's `omarchy-laun
 - `donateUrl`: payment link behind "Open in UPI app" under **♥ Support** (defaults to the maintainer's UPI link; set `""` to hide that link).
 
 Logs: `journalctl --user -u nba-scores -f`
+
+## Logs
+Everything stays on your machine.
+- Fetcher (fetch latency/source, fetch errors, game state changes): `journalctl --user -u nba-scores -f`
+- Widget clicks (open game, box score, support): `~/.local/state/nba-scores/usage.log`, rotated at 512 KB into `usage.log.1` (under 1 MB total).
+
+The bar shows full scores only while a game is live and collapses to a small 🏀 icon otherwise.
 
 ## Privacy
 No telemetry, no analytics, no accounts. The only network calls are HTTPS GETs for NBA's public JSON files: `cdn.nba.com`, falling back

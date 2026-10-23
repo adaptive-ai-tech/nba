@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.adaptive-ai-tech.nba",
   "name": "NBA Scores",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Adaptive AI Technologies",
   "license": "MIT",
   "description": "Live NBA scores in the Omarchy bar. A local systemd --user fetcher caches the public NBA CDN feed; click a game to open it.",
@@ -12,6 +12,6 @@
     "displayName": "NBA Scores",
     "category": "Info",
     "allowMultiple": false,
-    "defaultSection": "right"
+    "defaultSection": "center"
   }
 }

@@ -58,7 +58,8 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "🏀 " + Model.barText(root.scores, root.rot)
+    // Full scores only while a game is live; otherwise collapse to a small icon (click still opens the schedule).
+    text: (root.scores && root.scores.live) ? "🏀 " + Model.barText(root.scores, root.rot) : "🏀"
     tooltipText: root.scores ? ("NBA scores · updated " + (root.scores.updated || "")) : "NBA scores: waiting for nba-scores.service"
     onPressed: function(buttonCode) { if (buttonCode === Qt.LeftButton) root.toggle() }
   }
