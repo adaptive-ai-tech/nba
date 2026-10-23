@@ -72,7 +72,6 @@ UPI QR (also shown from **♥ Support** in the dropdown footer):
 
 <img src="assets/donate-qr.jpg" alt="UPI donation QR" width="240">
 
-UPI ID: `9629734560@hdfc`
 
 ## License
 MIT © Adaptive AI Technologies. Not affiliated with the NBA. Team names and data belong to their owners.
