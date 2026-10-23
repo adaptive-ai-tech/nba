@@ -1,0 +1,14 @@
+[Unit]
+Description=NBA Scores fetcher (cache for the Omarchy bar widget)
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/env python3 %h/.local/share/nba-scores/nba-scores-fetch.py
+Restart=always
+RestartSec=30
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

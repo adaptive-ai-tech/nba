@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.adaptive-ai-tech.nba",
+  "name": "NBA Scores",
+  "version": "1.0.0",
+  "author": "Adaptive AI Technologies",
+  "license": "MIT",
+  "description": "Live NBA scores in the Omarchy bar. A local systemd --user fetcher caches the public NBA CDN feed; click a game to open it.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "NBA Scores",
+    "category": "Info",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
