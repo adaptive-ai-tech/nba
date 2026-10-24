@@ -117,7 +117,7 @@ def upcoming(c, cache):
         return cache
 
 def main():
-    state, sched, box, seen = {}, {}, {}, {}
+    state, sched, box, seen, boxAt, finals = {}, {}, {}, {}, {}, {}
     log("start")
     while True:
         c = conf()
@@ -132,20 +132,32 @@ def main():
                 t = local(g.get("gameTimeUTC", ""))
                 if st == 2:
                     live = True
+                if st == 3 and seen.get(gid) == 2:
+                    finals[gid] = int(time.time())  # only finals we watched happen get a FINAL flash
                 if seen.get(gid) != st:
                     log(f"state {a['teamTricode']}@{h['teamTricode']} {gid} {seen.get(gid)}->{st} {a['score']}-{h['score']}")
                     seen[gid] = st
-                if st == 2 or (st == 3 and gid not in box):
+                # Box scores are the slow part (one request per game): refresh live ones at most every 2 min.
+                if (st == 2 and time.time() - boxAt.get(gid, 0) >= 120) or (st == 3 and gid not in box):
                     lb = leaders(gid)
+                    boxAt[gid] = time.time()
                     if lb:
                         box[gid] = lb
-                status = (f"Q{g['period']} {clock(g.get('gameClock', ''))}".strip() if st == 2
-                          else g.get("gameStatusText", "").strip())
+                gst = g.get("gameStatusText", "").strip()
+                gc = clock(g.get("gameClock", ""))
+                if st == 2:
+                    # Breaks (halftime, end of quarter) report a 0:00 clock; NBA's own text ("Half", "End Q2") is clearer.
+                    status = f"Q{g['period']} {gc}" if gc and gc != "0:00" else (gst or f"Q{g['period']}")
+                elif st == 1:
+                    status = (t.strftime("%H:%M ") + tz(t)) if t else gst
+                else:
+                    status = gst
                 games.append({"gameId": gid, "status": st, "statusText": status,
                               "away": a["teamTricode"], "home": h["teamTricode"],
                               "awayScore": a["score"], "homeScore": h["score"],
                               "start": (t.strftime("%H:%M ") + tz(t)) if t else "",
-                              "url": f"https://www.nba.com/game/{gid}", "leaders": box.get(gid)})
+                              "url": f"https://www.nba.com/game/{gid}", "leaders": box.get(gid),
+                              "finalAt": finals.get(gid)})
                 if c["notify"] and fav & {a["teamTricode"], h["teamTricode"]}:
                     if state.get(gid) is not None and state[gid] != st:
                         if st == 2:

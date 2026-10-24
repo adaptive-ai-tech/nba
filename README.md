@@ -53,6 +53,17 @@ Everything stays on your machine.
 
 The bar shows full scores only while a game is live and collapses to a small 🏀 icon otherwise.
 
+### Live strip (optional second instance)
+Add a second instance with `"mode": "strip"` to lay every live game out at once (e.g. `MIL 88-84 CHI Q3 5:10`),
+showing `FINAL` for 10 minutes after a game ends. It hides itself completely when nothing is live. In
+`~/.config/omarchy/shell.json`, under `bar.layout.left`, after your existing items:
+
+```json
+{ "id": "io.github.adaptive-ai-tech.nba", "mode": "strip", "maxGames": 4, "finalSeconds": 600 }
+```
+
+With more than `maxGames` games it rotates through pages every 6 s.
+
 ## Privacy
 No telemetry, no analytics, no accounts. The only network calls are HTTPS GETs for NBA's public JSON files: `cdn.nba.com`, falling back
 to NBA's own origin `nba-prod-us-east-1-mediaops-stats.s3.amazonaws.com` where the CDN returns 403.
