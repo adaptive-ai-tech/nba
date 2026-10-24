@@ -55,7 +55,7 @@ The bar shows full scores only while a game is live and collapses to a small üè
 
 ### Live strip (optional second instance)
 Add a second instance with `"mode": "strip"` to lay every live game out at once (e.g. `MIL 88-84 CHI Q3 5:10`),
-showing `FINAL` for 10 minutes after a game ends. It hides itself completely when nothing is live. In
+showing `FINAL` for 10 minutes after a game ends. When nothing is live it shrinks to a small üèÄ icon; click it any time for the schedule, box scores and Support. In
 `~/.config/omarchy/shell.json`, under `bar.layout.left`, after your existing items:
 
 ```json

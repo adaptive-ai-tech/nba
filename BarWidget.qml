@@ -13,11 +13,10 @@ BarWidget {
   property real nowSecs: Date.now() / 1000
 
   // Per-instance setting from shell.json: "summary" (default, one compact widget) or
-  // "strip" (every live game laid out inline; hidden entirely when nothing is live).
+  // "strip" (every live game laid out inline; a small 🏀 icon when nothing is live).
   readonly property string mode: setting("mode", "summary")
   readonly property bool strip: mode === "strip"
   readonly property var stripGames: Model.stripGames(root.scores, root.nowSecs, setting("finalSeconds", 600))
-  visible: !strip || stripGames.length > 0
 
   readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
@@ -35,7 +34,7 @@ BarWidget {
   }
   onScoresChanged: if (panelLoader.item) panelLoader.item.scores = root.scores
 
-  implicitWidth: visible ? button.implicitWidth : 0
+  implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
   onBarChanged: injectPanel()
 
@@ -67,8 +66,9 @@ BarWidget {
     anchors.fill: parent
     bar: root.bar
     // Full scores only while a game is live; otherwise collapse to a small icon (click still opens the schedule).
+    // Strip: all live games inline; a small icon when idle so the dropdown is always one click away.
     text: root.strip
-      ? "🏀 " + Model.stripText(root.stripGames, root.rot, setting("maxGames", 4))
+      ? (root.stripGames.length ? "🏀 " + Model.stripText(root.stripGames, root.rot, setting("maxGames", 4)) : "🏀")
       : ((root.scores && root.scores.live) ? "🏀 " + Model.barText(root.scores, root.rot) : "🏀")
     tooltipText: root.scores ? ("NBA scores · updated " + (root.scores.updated || "")) : "NBA scores: waiting for nba-scores.service"
     onPressed: function(buttonCode) { if (buttonCode === Qt.LeftButton) root.toggle() }
