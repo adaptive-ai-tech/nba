@@ -22,7 +22,7 @@ Recommended placement (next to the clock): `omarchy bar move io.github.adaptive-
 Requires `python3`, `systemd --user`, and `chromium` (or Omarchy's `omarchy-launch-webapp`) for game pages.
 
 ## Usage
-- **Bar:** rotates live scores (`LAL 102–98 BOS Q4 3:12`), otherwise the next tip-off, otherwise `No games`.
+- **Bar:** compact live scores only (`LAL 102-98 BOS Q4`); tip-off times, clock and status are in the tooltip and dropdown.
 - **Click the widget:** a dropdown under the bar lists today's games with score, clock/status and start time.
 - **Click a game:** opens its live page, `https://www.nba.com/game/<gameId>`, in an app window.
 - **▸ next to a game:** top three scorers per team. **Escape** closes the dropdown.
@@ -54,8 +54,8 @@ Everything stays on your machine.
 The bar shows full scores only while a game is live and collapses to a small 🏀 icon otherwise.
 
 ### Live strip (optional second instance)
-Add a second instance with `"mode": "strip"` to lay every live game out at once (e.g. `MIL 88-84 CHI Q3 5:10`),
-showing `FINAL` for 10 minutes after a game ends. When nothing is live it shrinks to a small 🏀 icon; click it any time for the schedule, box scores and Support. In
+Add a second instance with `"mode": "strip"` to lay every live game out at once (e.g. `MIL 88-84 CHI Q3`),
+showing `F` for 10 minutes after a game ends. When nothing is live it shrinks to a small 🏀 icon; click it any time for the schedule, box scores and Support. In
 `~/.config/omarchy/shell.json`, under `bar.layout.left`, after your existing items:
 
 ```json

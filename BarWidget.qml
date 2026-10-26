@@ -69,8 +69,8 @@ BarWidget {
     // Strip: all live games inline; a small icon when idle so the dropdown is always one click away.
     text: root.strip
       ? (root.stripGames.length ? "🏀 " + Model.stripText(root.stripGames, root.rot, setting("maxGames", 4)) : "🏀")
-      : ((root.scores && root.scores.live) ? "🏀 " + Model.barText(root.scores, root.rot) : "🏀")
-    tooltipText: root.scores ? ("NBA scores · updated " + (root.scores.updated || "")) : "NBA scores: waiting for nba-scores.service"
+      : ((root.scores && root.scores.live && Model.barText(root.scores, root.rot)) ? "🏀 " + Model.barText(root.scores, root.rot) : "🏀")
+    tooltipText: Model.tooltipText(root.scores)
     onPressed: function(buttonCode) { if (buttonCode === Qt.LeftButton) root.toggle() }
   }
 }

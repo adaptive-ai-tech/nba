@@ -3,18 +3,14 @@ function parse(text) {
   try { var d = JSON.parse(text); return d && d.games ? d : null } catch (e) { return null }
 }
 function line(g) {
-  if (g.status === 1) return g.away + " @ " + g.home + " " + g.start
-  return g.away + " " + g.awayScore + "–" + g.homeScore + " " + g.home + " " + g.statusText
+  return stripLine(g)
 }
 function barText(d, idx) {
   if (!d) return "NBA"
   var live = d.games.filter(function (g) { return g.status === 2 })
   if (live.length) return line(live[idx % live.length])
-  var next = d.games.filter(function (g) { return g.status === 1 })
-  if (next.length) return "Next " + next[0].away + "@" + next[0].home + " " + next[0].start
-  if (d.games.length) return line(d.games[idx % d.games.length])
-  if (d.upcoming && d.upcoming.length) return "Next " + d.upcoming[0].start
-  return "No games"
+  // Upcoming tip-off times live in the tooltip/dropdown only, to keep the bar narrow.
+  return ""
 }
 // Games for the left "strip" instance: every live game, plus games that went final in the last `finalSecs`.
 function stripGames(d, nowSecs, finalSecs) {
@@ -23,15 +19,33 @@ function stripGames(d, nowSecs, finalSecs) {
     return g.status === 2 || (g.status === 3 && g.finalAt && nowSecs - g.finalAt < finalSecs)
   })
 }
+// Tiny period tag for the bar: "Q3", "OT", "HT", "F". Never the clock, tip-off time or date.
+function period(g) {
+  if (g.status === 3) return "F"
+  var t = String(g.statusText || "")
+  if (/half/i.test(t)) return "HT"
+  var m = t.match(/\b(Q[1-4]|\d?OT\d?)\b/i)
+  return m ? m[1].toUpperCase() : ""
+}
 function stripLine(g) {
-  return g.away + " " + g.awayScore + "-" + g.homeScore + " " + g.home + " " + (g.status === 3 ? "FINAL" : g.statusText)
+  var p = period(g)
+  return g.away + " " + g.awayScore + "-" + g.homeScore + " " + g.home + (p ? " " + p : "")
+}
+// Full details (clock, status, IST start times) for the tooltip only.
+function tooltipText(d) {
+  if (!d || !d.games) return "NBA scores: waiting for nba-scores.service"
+  var rows = d.games.map(function (g) {
+    if (g.status === 1) return g.away + " @ " + g.home + "  " + g.start
+    return g.away + " " + g.awayScore + "-" + g.homeScore + " " + g.home + "  " + g.statusText + "  (" + g.start + ")"
+  })
+  return "NBA scores · updated " + (d.updated || "") + (rows.length ? "\n" + rows.join("\n") : "\nNo games today")
 }
 // All games at once when they fit (<= perPage), otherwise rotate pages of perPage.
 function stripText(games, idx, perPage) {
   if (!games.length) return ""
   var pages = Math.ceil(games.length / perPage)
   var p = idx % pages
-  return games.slice(p * perPage, p * perPage + perPage).map(stripLine).join("  ·  ")
+  return games.slice(p * perPage, p * perPage + perPage).map(stripLine).join(" · ")
 }
 function leaderText(g) {
   if (!g.leaders) return ""
